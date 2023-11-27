@@ -50,37 +50,33 @@ const addBookHandler = (request, h) => {
     });
     response.code(500);
     return response;
-    
+
 };
 
 const getAllBooksHandler = (request, h) => {
-
-    const { name } = request.query;
-    if(name !== undefined){
-      const response = h.response({
+    const { name, reading, finished } = request.query;
+    let filterBooks = books;
+    if (name !== undefined) {
+        filterBooks = filterBooks.filter((book) => book.name.toLowerCase().includes(name.toLowerCase()))
+    };
+    if (reading !== undefined) {
+        filterBooks = filterBooks.filter((book) => book.reading === !!Number(reading))
+    };
+    if (finished !== undefined) {
+        filterBooks = filterBooks.filter((book) => book.finished === !!Number(finished))
+    };
+    const response = h.response({
         status: 'success',
         data: {
-          books:  books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase())).map((book) => ({
-            id: book.id,
-            name: book.name,
-            publisher: book.publisher})),
-        },
-        });
-
-        response.code(200);
-        return response;
-    } else {
-    return {
-        status: 'success',
-        data: {
-          books:  books.map((book) => ({
-            id: book.id,
-            name: book.name,
-            publisher: book.publisher,
+            books: filterBooks.map((book) => ({
+                id: book.id,
+                name: book.name,
+                publisher: book.publisher,
             })),
         }
-      }
-    };
+    });
+    response.code(200);
+    return response;
 };
 
 
@@ -124,7 +120,7 @@ const editBookByIdHandler = (request, h) => {
         response.code(400);
         return response;
     };
-    
+
     if (readPage > pageCount) {
         const response = h.response({
             status: 'fail',
